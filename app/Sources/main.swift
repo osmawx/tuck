@@ -1,5 +1,8 @@
 import AppKit
 import SwiftUI
+#if canImport(Sparkle)
+import Sparkle
+#endif
 
 /// Wires the status bar controller, the model, the hidden items panel and the layout window together.
 @MainActor
@@ -10,6 +13,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var barModel: BarModel?
     private var hiddenBarPanel: HiddenBarPanelController?
     private var layoutWindow: NSWindow?
+#if canImport(Sparkle)
+    private var updater: SPUStandardUpdaterController?
+#endif
 
     /// Creates the status items, hidden panel, and layout window.
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -21,6 +27,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         statusBarController = controller
         barModel = model
         hiddenBarPanel = panel
+#if canImport(Sparkle)
+        let updater = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+        self.updater = updater
+        controller.onCheckForUpdates = { [weak updater] in updater?.checkForUpdates(nil) }
+#endif
         showLayoutWindow()
     }
 
@@ -42,8 +53,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             )
             window.title = "Menu Bar Layout"
             window.isReleasedWhenClosed = false
-            let hostingView = NSHostingView(rootView: SettingsView(model: barModel))
-            // Lets the SwiftUI toolbar (refresh button) and title reach the window.
+            let hostingView = NSHostingView(rootView: SettingsView(
+                model: barModel,
+                onCheckForUpdates: statusBarController?.onCheckForUpdates
+            ))
+            // Lets the SwiftUI toolbar and title reach the window.
             hostingView.sceneBridgingOptions = [.toolbars, .title]
             window.contentView = hostingView
             window.delegate = self
