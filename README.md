@@ -8,7 +8,9 @@ Tuck is a native macOS utility for organizing menu bar icons. Drag icons between
 
 ## Install and update
 
-Download `Tuck.zip` from [GitHub Releases](https://github.com/osmawx/tuck/releases/latest), unpack it, and move Tuck to Applications. GitHub release builds check for and install updates through Sparkle. To check immediately, right-click the menu bar dot and choose **Check for Updates…**.
+Download `Tuck.dmg`, open it, and drag `Tuck.app` onto the Applications shortcut labeled «Программы». Finder shows the installation steps and a Privacy & Security shortcut directly in the disk image window. A ZIP download is also available. [GitHub Releases](https://github.com/osmawx/tuck/releases/latest)
+
+GitHub release builds check for and install ZIP updates through Sparkle. To check immediately, click **Check for Updates…** in the Menu Bar Layout toolbar or in the menu bar dot’s context menu.
 
 GitHub release builds use Tuck’s dedicated self-signed certificate. Apple does not notarize these builds. When you first open a copy you trust, macOS may ask you to approve it in **System Settings → Privacy & Security → Open Anyway**. See [Apple’s instructions](https://support.apple.com/en-us/102445).
 

@@ -4,6 +4,7 @@ import SwiftUI
 /// Main window: header, sort row, permission rows, three icon sections.
 struct SettingsView: View {
     @ObservedObject var model: BarModel
+    let onCheckForUpdates: (() -> Void)?
     @State private var isLaunchAtLoginEnabled = SMAppService.mainApp.status == .enabled
 
     var body: some View {
@@ -39,6 +40,11 @@ struct SettingsView: View {
         .background(Color(nsColor: .windowBackgroundColor))
         .navigationTitle("Menu Bar Layout")
         .toolbar {
+            if let onCheckForUpdates {
+                ToolbarItem {
+                    Button("Check for Updates…", action: onCheckForUpdates)
+                }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button(action: model.refresh) { Image(systemName: "arrow.clockwise") }
                     .help("Rescan the menu bar")

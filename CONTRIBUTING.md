@@ -51,7 +51,13 @@ Co-authored-by: Codex <noreply@openai.com>
 
 ## Releases
 
-The [Publish Tuck workflow](.github/workflows/release.yml) runs after updates to `main`. It tests the code, builds Tuck for Apple Silicon and Intel, and signs it with a dedicated self-signed certificate. Sparkle signs and verifies `Tuck.zip` and `appcast.xml` before GitHub publishes them together. Version `1.0.N` uses the workflow run number. Use **Run workflow** on `main` to retry setup. No Apple Developer Program membership or notarization credentials are needed.
+The [Publish Tuck workflow](.github/workflows/release.yml) runs after updates to `main`. It tests the code, builds Tuck for Apple Silicon and Intel, and signs it with a dedicated self-signed certificate. Sparkle signs and verifies `Tuck.zip` and `appcast.xml`. GitHub publishes these update files together with `Tuck.dmg`, the drag-to-install disk image. Version `1.0.N` uses the workflow run number. Use **Run workflow** on `main` to retry setup. No Apple Developer Program membership or notarization credentials are needed.
+
+To package a signed build as a DMG locally, run the following command with Python 3.11 or later. Set `TUCK_DMG_PYTHON` to the interpreter path if `python3` points to an older version. The script installs hash-pinned layout tools in a temporary environment.
+
+```bash
+./scripts/package-dmg.sh build/Tuck.app build/Tuck.dmg
+```
 
 ### One-time signing setup
 

@@ -18,7 +18,6 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 45
     env:
-      TUCK_SPARKLE_DIR: ${{ runner.temp }}/tuck-sparkle
       TUCK_SIGNING_CERT_SHA1: ${{ vars.TUCK_SIGNING_CERT_SHA1 }}
       TUCK_SPARKLE_PUBLIC_KEY: ${{ vars.TUCK_SPARKLE_PUBLIC_KEY }}
     steps:
@@ -59,7 +58,11 @@ jobs:
           "$RUNNER_TEMP/tuck-tests"
 
       - name: Fetch verified Sparkle SDK
-        run: scripts/fetch-sparkle.sh "$TUCK_SPARKLE_DIR"
+        run: |
+          set -euo pipefail
+          sparkle_dir="$RUNNER_TEMP/tuck-sparkle"
+          scripts/fetch-sparkle.sh "$sparkle_dir"
+          printf 'TUCK_SPARKLE_DIR=%s\n' "$sparkle_dir" >> "$GITHUB_ENV"
 
       - name: Build and sign
         env:
@@ -76,7 +79,15 @@ jobs:
           TUCK_SPARKLE_PRIVATE_KEY: ${{ secrets.TUCK_SPARKLE_PRIVATE_KEY }}
         run: scripts/package-update.sh build/Tuck.app "$RUNNER_TEMP/tuck-release" "v1.0.$GITHUB_RUN_NUMBER"
 
-      - name: Publish both files together
+      - name: Set up Python for DMG layout
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
+
+      - name: Package installer DMG
+        run: scripts/package-dmg.sh build/Tuck.app "$RUNNER_TEMP/tuck-release/Tuck.dmg"
+
+      - name: Publish installer and update files together
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -95,7 +106,7 @@ jobs:
             gh release create "$tag" --draft --target "$GITHUB_SHA" --title "Tuck ${tag#v}" --generate-notes
           fi
           release_dir="$RUNNER_TEMP/tuck-release"
-          gh release upload "$tag" "$release_dir/Tuck.zip" "$release_dir/appcast.xml" --clobber
+          gh release upload "$tag" "$release_dir/Tuck.dmg" "$release_dir/Tuck.zip" "$release_dir/appcast.xml" --clobber
 
           # A retried older run must never replace a newer appcast at the latest URL.
           latest=true

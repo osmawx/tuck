@@ -53,8 +53,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             )
             window.title = "Menu Bar Layout"
             window.isReleasedWhenClosed = false
-            let hostingView = NSHostingView(rootView: SettingsView(model: barModel))
-            // Lets the SwiftUI toolbar (refresh button) and title reach the window.
+            let hostingView = NSHostingView(rootView: SettingsView(
+                model: barModel,
+                onCheckForUpdates: statusBarController?.onCheckForUpdates
+            ))
+            // Lets the SwiftUI toolbar and title reach the window.
             hostingView.sceneBridgingOptions = [.toolbars, .title]
             window.contentView = hostingView
             window.delegate = self
