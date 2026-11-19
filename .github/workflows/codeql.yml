@@ -16,6 +16,9 @@ jobs:
     name: CodeQL (Swift)
     runs-on: macos-26
     timeout-minutes: 25
+    env:
+      # CodeQL's build tracer still requires the Xcode 26 toolchain.
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
 
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -36,7 +39,8 @@ jobs:
           while IFS= read -r -d '' source; do
             sources+=("$source")
           done < <(find Sources -type f -name '*.swift' -print0)
-          swiftc -swift-version 5 "${sources[@]}" -o "$RUNNER_TEMP/Tuck-CodeQL"
+          # Trace one frontend invocation for the whole target.
+          swiftc -swift-version 5 -whole-module-optimization -j 2 "${sources[@]}" -o "$RUNNER_TEMP/Tuck-CodeQL"
 
       - name: Analyze Swift
         uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
