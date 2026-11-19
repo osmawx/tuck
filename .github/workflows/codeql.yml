@@ -35,10 +35,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Accept the original layout until the app/ move lands.
+          source_directory=app/Sources
+          if [[ ! -d "$source_directory" ]]; then
+            source_directory=Sources
+          fi
           sources=()
           while IFS= read -r -d '' source; do
             sources+=("$source")
-          done < <(find Sources -type f -name '*.swift' -print0)
+          done < <(find "$source_directory" -type f -name '*.swift' -print0)
           # Trace one frontend invocation for the whole target.
           swiftc -swift-version 5 -whole-module-optimization -j 2 "${sources[@]}" -o "$RUNNER_TEMP/Tuck-CodeQL"
 
