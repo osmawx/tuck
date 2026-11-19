@@ -1,7 +1,7 @@
 #!/bin/bash
 # Builds Tuck.app (menu bar organizer) into ./build.
 set -euo pipefail
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 
 APP="build/Tuck.app"
 BUNDLE_ID="com.local.hider"
@@ -26,7 +26,7 @@ if [[ -z "$SIGNING_HASH" ]]; then
     SIGNING_HASH=$(security find-certificate -c "$SIGNING_IDENTITY" -Z 2>/dev/null | awk '/SHA-1 hash:/ {print $3; exit}' || true)
 fi
 if [[ ! "$SIGNING_HASH" =~ ^[A-Fa-f0-9]{40}$ ]]; then
-    echo "Missing or invalid signing identity. For local builds run ./setup-signing.sh once." >&2
+    echo "Missing or invalid signing identity. For local builds run ./scripts/setup-signing.sh once." >&2
     exit 1
 fi
 SIGNING_OPTIONS=(--force --sign "$SIGNING_HASH" --timestamp=none)
@@ -42,7 +42,7 @@ mkdir -p "$APP/Contents/MacOS"
 sources=()
 while IFS= read -r -d '' source; do
     sources+=("$source")
-done < <(find Sources -type f -name '*.swift' -print0)
+done < <(find app/Sources -type f -name '*.swift' -print0)
 
 if [[ -n "$SPARKLE_DIR" ]]; then
     mkdir -p "$APP/Contents/Frameworks" "$APP/Contents/Resources"

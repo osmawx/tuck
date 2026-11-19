@@ -5,9 +5,9 @@ cd "$(dirname "$0")/.."
 
 # RFC 8032 test key. Never use this seed to sign releases.
 test_seed="nWGxne/9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A="
-public_key="$(printf '%s' "$test_seed" | swift Scripts/sparkle-public-key.swift)"
+public_key="$(printf '%s' "$test_seed" | swift scripts/sparkle-public-key.swift)"
 [[ "$public_key" == "11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo=" ]]
-if printf '%s' 'invalid-key' | swift Scripts/sparkle-public-key.swift >/dev/null 2>&1; then
+if printf '%s' 'invalid-key' | swift scripts/sparkle-public-key.swift >/dev/null 2>&1; then
     echo "Invalid Sparkle key was accepted." >&2
     exit 1
 fi

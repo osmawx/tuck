@@ -54,4 +54,4 @@ fi
 # codesign also needs the temporary keychain in its search list to resolve a self-signed identity.
 changed_search_list=true
 security list-keychains -d user -s "$keychain" ${previous_keychains[@]+"${previous_keychains[@]}"}
-TUCK_SIGNING_KEYCHAIN="$keychain" ./build.sh
+TUCK_SIGNING_KEYCHAIN="$keychain" ./scripts/build.sh

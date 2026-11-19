@@ -41,7 +41,7 @@ jobs:
               exit 1
             fi
           done
-          public_key="$(printf '%s' "$TUCK_SPARKLE_PRIVATE_KEY" | swift Scripts/sparkle-public-key.swift)"
+          public_key="$(printf '%s' "$TUCK_SPARKLE_PRIVATE_KEY" | swift scripts/sparkle-public-key.swift)"
           if [[ "$public_key" != "$TUCK_SPARKLE_PUBLIC_KEY" ]]; then
             echo "::error::The Sparkle private key does not match the configured public key."
             exit 1
@@ -50,16 +50,16 @@ jobs:
       - name: Run regression checks
         run: |
           set -euo pipefail
-          Tests/sparkle-key.sh
+          scripts/test-sparkle-key.sh
           sources=()
           while IFS= read -r -d '' source; do
             if [[ "${source##*/}" != main.swift ]]; then sources+=("$source"); fi
-          done < <(find Sources -type f -name '*.swift' -print0)
-          swiftc -O -swift-version 5 "${sources[@]}" Tests/main.swift -o "$RUNNER_TEMP/tuck-tests"
+          done < <(find app/Sources -type f -name '*.swift' -print0)
+          swiftc -O -swift-version 5 "${sources[@]}" app/Tests/main.swift -o "$RUNNER_TEMP/tuck-tests"
           "$RUNNER_TEMP/tuck-tests"
 
       - name: Fetch verified Sparkle SDK
-        run: Scripts/fetch-sparkle.sh "$TUCK_SPARKLE_DIR"
+        run: scripts/fetch-sparkle.sh "$TUCK_SPARKLE_DIR"
 
       - name: Build and sign
         env:
@@ -69,12 +69,12 @@ jobs:
           set -euo pipefail
           export TUCK_BUILD_NUMBER="$((GITHUB_RUN_NUMBER + 1))"
           export TUCK_VERSION="1.0.$GITHUB_RUN_NUMBER"
-          Scripts/build-release-app.sh
+          scripts/build-release-app.sh
 
       - name: Sign update archive and feed
         env:
           TUCK_SPARKLE_PRIVATE_KEY: ${{ secrets.TUCK_SPARKLE_PRIVATE_KEY }}
-        run: Scripts/package-update.sh build/Tuck.app "$RUNNER_TEMP/tuck-release" "v1.0.$GITHUB_RUN_NUMBER"
+        run: scripts/package-update.sh build/Tuck.app "$RUNNER_TEMP/tuck-release" "v1.0.$GITHUB_RUN_NUMBER"
 
       - name: Publish both files together
         env:

@@ -2,22 +2,22 @@
 
 ## Setup
 
-Build and sign Tuck as described in [README.md](README.md). Swift sources live in `Sources/` and regression checks in `Tests/main.swift`. The app uses SwiftUI and AppKit with macOS frameworks.
+Build and sign Tuck as described in [README.md](README.md). Swift sources live in `app/Sources/` and regression checks in `app/Tests/main.swift`. The app uses SwiftUI and AppKit with macOS frameworks.
 
 ## Checks
 
 Build the signed app and run the regression executable on macOS:
 
 ```bash
-./build.sh
-bash -n build.sh && bash -n setup-signing.sh
-bash Tests/sparkle-key.sh
+./scripts/build.sh
+bash -n scripts/build.sh && bash -n scripts/setup-signing.sh
+bash scripts/test-sparkle-key.sh
 test_dir=$(mktemp -d)
 sources=()
 while IFS= read -r -d '' source; do
   if [[ "${source##*/}" != main.swift ]]; then sources+=("$source"); fi
-done < <(find Sources -type f -name '*.swift' -print0)
-swiftc -O -swift-version 5 "${sources[@]}" Tests/main.swift -o "$test_dir/tuck-tests"
+done < <(find app/Sources -type f -name '*.swift' -print0)
+swiftc -O -swift-version 5 "${sources[@]}" app/Tests/main.swift -o "$test_dir/tuck-tests"
 "$test_dir/tuck-tests"
 ```
 
@@ -57,10 +57,10 @@ The [Publish Tuck workflow](.github/workflows/release.yml) runs after updates to
 
 Use a dedicated release identity. Keep the same certificate and Sparkle key across releases. Changing either can break the existing update path or invalidate macOS privacy permissions. Keep both keys backed up securely.
 
-Create a password-protected `.p12` with `Scripts/create-release-identity.sh`. Set `TUCK_SIGNING_P12_PASSWORD` to a strong export password in your shell environment before running the script. Save the fingerprint printed by the script.
+Create a password-protected `.p12` with `scripts/create-release-identity.sh`. Set `TUCK_SIGNING_P12_PASSWORD` to a strong export password in your shell environment before running the script. Save the fingerprint printed by the script.
 
 ```bash
-Scripts/create-release-identity.sh /path/to/TuckRelease.p12
+scripts/create-release-identity.sh /path/to/TuckRelease.p12
 ```
 
 In **GitHub Settings → Secrets and variables → Actions**, add these settings.
@@ -86,7 +86,7 @@ Generate a Sparkle key in your macOS Keychain and read its public key.
 
 ```bash
 sparkle_dir=$(mktemp -d)
-Scripts/fetch-sparkle.sh "$sparkle_dir"
+scripts/fetch-sparkle.sh "$sparkle_dir"
 "$sparkle_dir/bin/generate_keys" --account tuck-release
 "$sparkle_dir/bin/generate_keys" --account tuck-release -p
 ```

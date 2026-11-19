@@ -9,7 +9,8 @@ if security find-certificate -c "$SIGNING_NAME" >/dev/null 2>&1; then
 fi
 
 umask 077
-export SIGNING_PASSWORD=$(/usr/bin/openssl rand -hex 24)
+SIGNING_PASSWORD=$(/usr/bin/openssl rand -hex 24)
+export SIGNING_PASSWORD
 SIGNING_DIRECTORY=$(mktemp -d)
 trap 'rm -rf "$SIGNING_DIRECTORY"' EXIT
 cat > "$SIGNING_DIRECTORY/certificate.conf" <<'CONFIG'

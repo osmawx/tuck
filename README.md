@@ -21,12 +21,12 @@ Use macOS 26 and the Xcode Command Line Tools.
 ```sh
 git clone https://github.com/osmawx/tuck.git
 cd tuck
-./setup-signing.sh
-./build.sh
+./scripts/setup-signing.sh
+./scripts/build.sh
 open build/Tuck.app
 ```
 
-`setup-signing.sh` creates a local signing identity on first use. Keep that identity for subsequent builds so macOS can recognize the app. If upgrading from Hider, quit it before opening Tuck. Tuck keeps the original bundle ID and preference keys. Local builds use the local signing identity and omit the updater by default.
+`scripts/setup-signing.sh` creates a local signing identity on first use. Keep that identity for subsequent builds so macOS can recognize the app. If upgrading from Hider, quit it before opening Tuck. Tuck keeps the original bundle ID and preference keys. Local builds use the local signing identity and omit the updater by default.
 
 ## Set up your menu bar
 
@@ -36,5 +36,7 @@ open build/Tuck.app
 4. Click the dot to open the hidden items panel. Click outside or switch apps to close it. Right-click the dot to reopen **Menu Bar Layout**.
 
 Tuck stores the layout in local preferences. Icon captures stay in memory. Menu diagnostics are written to `/tmp/tuck-menu-diagnostics.log`.
+
+Swift sources and tests live in `app/`. Build and release scripts live in `scripts/`.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development and checks.
