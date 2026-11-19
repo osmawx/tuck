@@ -1,0 +1,44 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  swift:
+    name: CodeQL (Swift)
+    runs-on: macos-26
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Initialize Swift analysis
+        uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
+        with:
+          languages: swift
+          build-mode: manual
+
+      - name: Compile Tuck for CodeQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          sources=()
+          while IFS= read -r -d '' source; do
+            sources+=("$source")
+          done < <(find Sources -type f -name '*.swift' -print0)
+          swiftc -swift-version 5 "${sources[@]}" -o "$RUNNER_TEMP/Tuck-CodeQL"
+
+      - name: Analyze Swift
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
+        with:
+          category: /language:swift
