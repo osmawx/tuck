@@ -1,5 +1,8 @@
 import AppKit
 import SwiftUI
+#if canImport(Sparkle)
+import Sparkle
+#endif
 
 /// Wires the status bar controller, the model, the hidden items panel and the layout window together.
 @MainActor
@@ -10,6 +13,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var barModel: BarModel?
     private var hiddenBarPanel: HiddenBarPanelController?
     private var layoutWindow: NSWindow?
+#if canImport(Sparkle)
+    private var updater: SPUStandardUpdaterController?
+#endif
 
     /// Creates the status items, hidden panel, and layout window.
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -21,6 +27,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         statusBarController = controller
         barModel = model
         hiddenBarPanel = panel
+#if canImport(Sparkle)
+        let updater = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+        self.updater = updater
+        controller.onCheckForUpdates = { [weak updater] in updater?.checkForUpdates(nil) }
+#endif
         showLayoutWindow()
     }
 

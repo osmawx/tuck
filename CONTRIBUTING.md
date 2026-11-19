@@ -11,11 +11,12 @@ Build the signed app and run the regression executable on macOS:
 ```bash
 ./build.sh
 bash -n build.sh && bash -n setup-signing.sh
+bash Tests/sparkle-key.sh
 test_dir=$(mktemp -d)
 sources=()
-for source in Sources/*.swift; do
-  if [[ "$source" != Sources/main.swift ]]; then sources+=("$source"); fi
-done
+while IFS= read -r -d '' source; do
+  if [[ "${source##*/}" != main.swift ]]; then sources+=("$source"); fi
+done < <(find Sources -type f -name '*.swift' -print0)
 swiftc -O -swift-version 5 "${sources[@]}" Tests/main.swift -o "$test_dir/tuck-tests"
 "$test_dir/tuck-tests"
 ```
@@ -46,4 +47,59 @@ For AI-assisted commits, add these trailers. Replace placeholders with the activ
 AI-Model: <current model>
 AI-Reasoning-Effort: <current reasoning level>
 Co-authored-by: Codex <noreply@openai.com>
+```
+
+## Releases
+
+The [Publish Tuck workflow](.github/workflows/release.yml) runs after updates to `main`. It tests the code, builds Tuck for Apple Silicon and Intel, and signs it with a dedicated self-signed certificate. Sparkle signs and verifies `Tuck.zip` and `appcast.xml` before GitHub publishes them together. Version `1.0.N` uses the workflow run number. Use **Run workflow** on `main` to retry setup. No Apple Developer Program membership or notarization credentials are needed.
+
+### One-time signing setup
+
+Use a dedicated release identity. Keep the same certificate and Sparkle key across releases. Changing either can break the existing update path or invalidate macOS privacy permissions. Keep both keys backed up securely.
+
+Create a password-protected `.p12` with `Scripts/create-release-identity.sh`. Set `TUCK_SIGNING_P12_PASSWORD` to a strong export password in your shell environment before running the script. Save the fingerprint printed by the script.
+
+```bash
+Scripts/create-release-identity.sh /path/to/TuckRelease.p12
+```
+
+In **GitHub Settings → Secrets and variables → Actions**, add these settings.
+
+| Secret | Value |
+| --- | --- |
+| `TUCK_SIGNING_P12_BASE64` | Base64-encoded release `.p12` |
+| `TUCK_SIGNING_P12_PASSWORD` | Export password for the `.p12` |
+| `TUCK_SPARKLE_PRIVATE_KEY` | Sparkle private seed exported below |
+
+| Variable | Value |
+| --- | --- |
+| `TUCK_SIGNING_CERT_SHA1` | Uppercase certificate fingerprint printed by the identity script |
+| `TUCK_SPARKLE_PUBLIC_KEY` | Sparkle public key printed by `generate_keys -p` |
+
+Upload the `.p12` without displaying its encoded contents.
+
+```bash
+base64 -i /path/to/TuckRelease.p12 | gh secret set TUCK_SIGNING_P12_BASE64 --repo osmawx/tuck
+```
+
+Generate a Sparkle key in your macOS Keychain and read its public key.
+
+```bash
+sparkle_dir=$(mktemp -d)
+Scripts/fetch-sparkle.sh "$sparkle_dir"
+"$sparkle_dir/bin/generate_keys" --account tuck-release
+"$sparkle_dir/bin/generate_keys" --account tuck-release -p
+```
+
+Upload its private key using an authenticated `gh` session.
+
+```bash
+(
+  set -euo pipefail
+  umask 077
+  key_dir=$(mktemp -d)
+  trap 'rm -rf "$key_dir"' EXIT
+  "$sparkle_dir/bin/generate_keys" --account tuck-release -x "$key_dir/sparkle.key"
+  gh secret set TUCK_SPARKLE_PRIVATE_KEY --repo osmawx/tuck < "$key_dir/sparkle.key"
+)
 ```

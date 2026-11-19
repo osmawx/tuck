@@ -24,6 +24,8 @@ final class StatusBarController: NSObject {
     var onToggleHiddenBar: (() -> Void)?
     /// "Menu Bar Layout…" in the dot's menu.
     var onOpenLayout: (() -> Void)?
+    /// Starts an interactive check in builds with the updater.
+    var onCheckForUpdates: (() -> Void)?
 
     /// Restores the saved positions before registering the three status items.
     override init() {
@@ -237,6 +239,11 @@ final class StatusBarController: NSObject {
         let layoutEntry = NSMenuItem(title: "Menu Bar Layout…", action: #selector(openLayout), keyEquivalent: ",")
         layoutEntry.target = self
         menu.addItem(layoutEntry)
+        if onCheckForUpdates != nil {
+            let updateEntry = NSMenuItem(title: "Check for Updates…", action: #selector(checkForUpdates), keyEquivalent: "")
+            updateEntry.target = self
+            menu.addItem(updateEntry)
+        }
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: "Quit Tuck", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
@@ -244,6 +251,11 @@ final class StatusBarController: NSObject {
         toggleItem.menu = menu
         toggleItem.button?.performClick(nil)
         toggleItem.menu = nil
+    }
+
+    /// Forwards the update action to the app's updater.
+    @objc private func checkForUpdates() {
+        onCheckForUpdates?()
     }
 
     /// Opens the layout window from the dot’s context menu.

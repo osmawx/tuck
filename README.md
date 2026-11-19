@@ -6,6 +6,14 @@ Tuck is a native macOS utility for organizing menu bar icons. Drag icons between
 - **Hidden Items** appear in the panel under the dot. Click one to open its original menu.
 - **Always Hidden** stay out of the panel.
 
+## Install and update
+
+Download `Tuck.zip` from [GitHub Releases](https://github.com/osmawx/tuck/releases/latest), unpack it, and move Tuck to Applications. GitHub release builds check for and install updates through Sparkle. To check immediately, right-click the menu bar dot and choose **Check for Updates…**.
+
+GitHub release builds use Tuck’s dedicated self-signed certificate. Apple does not notarize these builds. When you first open a copy you trust, macOS may ask you to approve it in **System Settings → Privacy & Security → Open Anyway**. See [Apple’s instructions](https://support.apple.com/en-us/102445).
+
+Replace an older development build manually once. macOS may ask again for Accessibility or Screen Recording access because release builds use a different signing identity. The application ID and saved layout keys are preserved.
+
 ## Build and run
 
 Use macOS 26 and the Xcode Command Line Tools.
@@ -18,7 +26,7 @@ cd tuck
 open build/Tuck.app
 ```
 
-`setup-signing.sh` creates a local signing identity on first use. Keep that identity for subsequent builds so macOS can recognize the app. If upgrading from Hider, quit it before opening Tuck. Tuck keeps the original bundle ID and preference keys.
+`setup-signing.sh` creates a local signing identity on first use. Keep that identity for subsequent builds so macOS can recognize the app. If upgrading from Hider, quit it before opening Tuck. Tuck keeps the original bundle ID and preference keys. Local builds use the local signing identity and omit the updater by default.
 
 ## Set up your menu bar
 
